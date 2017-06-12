@@ -8,6 +8,10 @@ public class InputManagerScript : MonoBehaviour
     [SerializeField]
     private GameConfigScript config;
 
+    [Tooltip("Custom line renderer")]
+    [SerializeField]
+    private LineRenderer lineRenderer;
+
     [Tooltip("Custom trail renderer")]
     [SerializeField]
     private TrailRenderer trailRenderer;
@@ -30,13 +34,14 @@ public class InputManagerScript : MonoBehaviour
     {
         if (Input.GetMouseButtonUp(0))
         {
+            lineRenderer.positionCount = 0;
             Texture2D gesturePattern = gesture.GetPattern();
             objectivePattern = config.Patterns[manager.Index].pattern;
             correctRate = config.CorrectRate;
 
             if (gesturePattern != null)
             {
-                if (gesture.TestPattern(gesturePattern, objectivePattern) > correctRate)
+                if (gesture.ComparePattern(gesturePattern, objectivePattern, correctRate))
                 {
                     manager.Alert("Correct!");
                     manager.NextLevel();
@@ -57,8 +62,10 @@ public class InputManagerScript : MonoBehaviour
         {
             gesture.MouseData.Add(Input.mousePosition);
 
-            Vector3 vector = new Vector3(Input.mousePosition.x, Input.mousePosition.y, Input.mousePosition.z - Camera.main.transform.position.z);
-            trailRenderer.transform.position = Camera.main.ScreenToWorldPoint(vector);
+            Vector3 mousePosition = Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, Input.mousePosition.z - Camera.main.transform.position.z));
+            trailRenderer.transform.position = mousePosition;
+            lineRenderer.positionCount++;
+            lineRenderer.SetPosition(lineRenderer.positionCount - 1, new Vector3(mousePosition.x, mousePosition.y, 0));
         }
     }
     #endregion

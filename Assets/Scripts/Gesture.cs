@@ -99,37 +99,43 @@ public class Gesture
         return texture2D;
     }
 
-    public float TestPattern(Texture2D fromTexture, Texture2D toTexture)
+    public bool ComparePattern(Texture2D gestureTexture, Texture2D patternTexture, float correctRate)
     {
-        if (fromTexture == null || toTexture == null)
+        if (gestureTexture == null || patternTexture == null)
         {
             Debug.LogError("Texture pattern for comparison is not set.");
-            return 0f;
+            return false;
         }
 
-        Color[] fromTexturePixels = fromTexture.GetPixels();
-        Color[] toTexturePixels = toTexture.GetPixels();
+        Color[] gestureTexturePixels = gestureTexture.GetPixels();
+        Color[] patternTexturePixels = patternTexture.GetPixels();
 
-        float toTextureBlackPixels = 0f;
+        float patternTextureBlackPixels = 0f;
+        float gestureTextureBlackPixels = 0f;
         float commonBlackPixels = 0f;
 
-        for (int i = 0; i < toTexturePixels.Length; ++i)
+        for (int i = 0; i < patternTexturePixels.Length; ++i)
         {
-            if (toTexturePixels[i] == Color.black)
+            if (patternTexturePixels[i] == Color.black)
             {
-                toTextureBlackPixels++;
+                patternTextureBlackPixels++;
             }
         }
 
-        for (int i = 0; i < fromTexturePixels.Length; ++i)
+        for (int i = 0; i < gestureTexturePixels.Length; ++i)
         {
-            if (fromTexturePixels[i] == Color.black && toTexturePixels[i] == Color.black)
+            if (gestureTexturePixels[i] == Color.black)
             {
-                commonBlackPixels++;
+                gestureTextureBlackPixels++;
+
+                if (patternTexturePixels[i] == Color.black)
+                {
+                    commonBlackPixels++;
+                }
             }
         }
 
-        return commonBlackPixels / toTextureBlackPixels;
+        return commonBlackPixels / patternTextureBlackPixels > correctRate && patternTextureBlackPixels / gestureTextureBlackPixels > correctRate - correctRate / 3;
     }
     #endregion
 }
